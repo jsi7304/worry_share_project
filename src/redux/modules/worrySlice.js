@@ -32,6 +32,22 @@ export const __deleteWorries = createAsyncThunk(
   }
 );
 
+export const __updateWorries = createAsyncThunk(
+  "worries/updateWorries",
+  async (payload, thunkAPI) => {
+    try {
+      console.log("payload", payload);
+      const data = await axios.patch(
+        `https://worry-share.herokuapp.com/worries/${payload.id}`,
+        payload
+      );
+
+      return thunkAPI.fulfillWithValue(data.data);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error);
+    }
+  }
+);
 const initialState = {
   worries: [],
   isLoading: false,
@@ -66,6 +82,18 @@ export const worrySlice = createSlice({
       );
     },
     [__deleteWorries.rejected]: (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload;
+    },
+    [__updateWorries.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [__updateWorries.fulfilled]: (state, action) => {
+      console.log("action", action);
+      state.isLoading = false;
+      state.worries = [action.payload];
+    },
+    [__updateWorries.rejected]: (state, action) => {
       state.isLoading = false;
       state.error = action.payload;
     },

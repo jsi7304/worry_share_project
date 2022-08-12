@@ -2,7 +2,7 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  updateWorry,
+  __updateWorries,
   __deleteWorries,
   __getWorries,
 } from "../redux/modules/worrySlice";
@@ -20,6 +20,7 @@ const WorryDetail = () => {
   const [targetId, setTargetId] = useState(null);
   const [editWorry, setEditWorry] = useState(false);
   const worry = worries.filter((worry) => worry.id == +id);
+  const [post, setPost] = useState({ id: id });
 
   useEffect(() => {
     dispatch(__getWorries());
@@ -50,9 +51,17 @@ const WorryDetail = () => {
     // dispatch(updateWorry(id));
   };
 
-  const editHandler = (e) => {
-    console.log(e.target.value);
+  const onClickEditCompleteHandler = () => {
+    console.log("수정완료버튼 동작");
+    dispatch(__updateWorries(post));
+    setEditWorry(!editWorry);
   };
+
+  const editHandler = (e) => {
+    const { value, name } = e.target;
+    setPost({ ...post, id: id, [name]: value });
+  };
+  console.log("post", post);
   return (
     <>
       <StId>
@@ -85,31 +94,59 @@ const WorryDetail = () => {
             return (
               <div key={worry.id}>
                 {" "}
-                <StTitle>{worry.title}</StTitle>
                 {editWorry ? (
-                  <StTextarea onChange={editHandler} />
+                  <div>
+                    <div>
+                      <StTextareaTitle
+                        onChange={editHandler}
+                        defaultValue={worry.title}
+                        name="title"
+                      />
+                    </div>{" "}
+                    <div>
+                      <StTextarea
+                        onChange={editHandler}
+                        defaultValue={worry.content}
+                        name="content"
+                      />
+                    </div>
+                    <StButtonDiv>
+                      <CommonButton
+                        text="수정완료"
+                        variant="outlined"
+                        margin="0"
+                        onClick={() => {
+                          onClickEditCompleteHandler(worry.id);
+                        }}
+                      />
+                    </StButtonDiv>
+                  </div>
                 ) : (
-                  <StContent>{worry.content}</StContent>
+                  <div>
+                    {" "}
+                    <StTitle>{worry.title}</StTitle>
+                    <StContent>{worry.content}</StContent>
+                    <StButtonDiv>
+                      <CommonButton
+                        text="수정하기"
+                        variant="outlined"
+                        margin="0"
+                        onClick={() => {
+                          onClickEditButtonHandler();
+                        }}
+                      />
+                      <CommonButton
+                        text="삭제하기"
+                        variant="outlined"
+                        margin="0"
+                        onClick={() => {
+                          onClickDeleteButtonHandler(worry.id);
+                          navigate("/list");
+                        }}
+                      />
+                    </StButtonDiv>
+                  </div>
                 )}
-                <StButtonDiv>
-                  <CommonButton
-                    text="수정하기"
-                    variant="outlined"
-                    margin="0"
-                    onClick={() => {
-                      onClickEditButtonHandler();
-                    }}
-                  />
-                  <CommonButton
-                    text="삭제하기"
-                    variant="outlined"
-                    margin="0"
-                    onClick={() => {
-                      onClickDeleteButtonHandler(worry.id);
-                      navigate("/list");
-                    }}
-                  />
-                </StButtonDiv>
               </div>
             );
           }
@@ -222,5 +259,11 @@ const StBox = styled(Box)`
 const StTextarea = styled.textarea`
   width: 100%;
   height: 250px;
+  box-sizing: border-box;
+`;
+
+const StTextareaTitle = styled.textarea`
+  width: 100%;
+  height: 50px;
   box-sizing: border-box;
 `;
